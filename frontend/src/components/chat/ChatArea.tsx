@@ -101,20 +101,20 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onBackClick, isMobile }) => 
 
   if (!activeChat) {
     return (
-      <div className="flex-1 h-full backdrop-blur-2xl bg-white/5 flex items-center justify-center">
+      <div className="flex-1 h-full bg-black flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-8">
           <div className="mb-6">
-            <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 backdrop-blur-lg border border-white/20 flex items-center justify-center">
-              <svg className="w-16 h-16 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+              <svg className="w-16 h-16 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
           </div>
           <h2 className="text-2xl font-bold text-white mb-4">Welcome to Your Chat</h2>
-          <p className="text-white/70 text-lg mb-2">
+          <p className="text-zinc-400 text-lg mb-2">
             Select a conversation to start messaging
           </p>
-          <p className="text-white/50 text-sm">
+          <p className="text-zinc-600 text-sm">
             Choose someone from the sidebar to begin chatting
           </p>
         </div>
@@ -126,15 +126,15 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onBackClick, isMobile }) => 
   const selectedUser = users.find((u) => u.id === activeChat);
   if (!selectedUser) {
     return (
-      <div className="flex-1 h-full backdrop-blur-2xl bg-white/5 flex items-center justify-center">
+      <div className="flex-1 h-full bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/20 backdrop-blur-lg border border-red-500/30 flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-900 border border-red-800 flex items-center justify-center">
             <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <p className="text-white/70 font-medium">User not found</p>
-          <p className="text-white/50 text-sm mt-1">This user may no longer exist</p>
+          <p className="text-zinc-300 font-medium">User not found</p>
+          <p className="text-zinc-600 text-sm mt-1">This user may no longer exist</p>
         </div>
       </div>
     );
@@ -144,14 +144,14 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onBackClick, isMobile }) => 
   const conversationMessages = messages[activeChat] || [];
 
   return (
-    <div className="flex-1 h-full backdrop-blur-2xl bg-white/5 flex flex-col">
+    <div className="flex-1 h-full bg-black flex flex-col">
       {/* Chat Header */}
-      <div className="p-4 border-b border-white/20 backdrop-blur-lg bg-white/10 flex items-center space-x-3 shadow-lg">
+      <div className="p-4 border-b border-zinc-800 bg-zinc-900 flex items-center space-x-3 shadow-lg">
         {/* Mobile back button */}
         {isMobile && onBackClick && (
           <button
             onClick={onBackClick}
-            className="p-2 text-white/70 hover:text-white rounded-xl hover:bg-white/10 backdrop-blur-sm transition-all duration-300 mr-2"
+            className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition-all duration-200 mr-2"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -162,7 +162,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onBackClick, isMobile }) => 
         <div className="relative">
           <Avatar user={selectedUser} size={isMobile ? "md" : "lg"} />
           {(selectedUser.isOnline || selectedUser.online) && (
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-white rounded-full shadow-lg animate-pulse"></div>
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-zinc-900 rounded-full"></div>
           )}
         </div>
 
@@ -171,8 +171,8 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onBackClick, isMobile }) => 
             {selectedUser.displayName || selectedUser.username}
           </h3>
           <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${(selectedUser.isOnline || selectedUser.online) ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`} />
-            <p className="text-sm text-white/70">
+            <div className={`w-2 h-2 rounded-full ${(selectedUser.isOnline || selectedUser.online) ? 'bg-green-500' : 'bg-zinc-600'}`} />
+            <p className="text-sm text-zinc-400">
               {(selectedUser.isOnline || selectedUser.online) ? 'Online' : selectedUser.lastSeen ? `Last seen ${formatTime(selectedUser.lastSeen)}` : 'Offline'}
             </p>
           </div>
@@ -180,15 +180,15 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onBackClick, isMobile }) => 
 
         <div className="flex items-center space-x-2">
           {/* Connection status */}
-          <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${
-            isConnected ? 'bg-green-500/20 text-green-300 border border-green-500/30' : 'bg-red-500/20 text-red-300 border border-red-500/30'
+          <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${
+            isConnected ? 'bg-green-900 text-green-300 border border-green-800' : 'bg-red-900 text-red-300 border border-red-800'
           }`}>
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
             <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
           </div>
 
           {/* More options button */}
-          <button className="p-2 text-white/70 hover:text-white rounded-xl hover:bg-white/10 backdrop-blur-sm transition-all duration-300">
+          <button className="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition-all duration-200">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
             </svg>
@@ -197,18 +197,18 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onBackClick, isMobile }) => 
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-black scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
         {conversationMessages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center max-w-sm mx-auto">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-lg border border-white/20 flex items-center justify-center">
-                <svg className="w-12 h-12 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                <svg className="w-12 h-12 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 8h10M7 12h10M7 16h10" />
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">No messages yet</h3>
-              <p className="text-white/60 mb-4">Start the conversation by sending a message!</p>
-              <div className="text-white/40 text-sm">
+              <p className="text-zinc-400 mb-4">Start the conversation by sending a message!</p>
+              <div className="text-zinc-600 text-sm">
                 Say hello to {selectedUser.displayName || selectedUser.username} 👋
               </div>
             </div>
@@ -225,7 +225,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onBackClick, isMobile }) => 
                 {/* Timestamp separator */}
                 {showTimestamp && (
                   <div className="flex justify-center">
-                    <span className="text-xs text-white/40 bg-white/10 backdrop-blur-lg px-3 py-1 rounded-full border border-white/20">
+                    <span className="text-xs text-zinc-500 bg-zinc-800 px-3 py-1 rounded-full border border-zinc-700">
                       {formatTime(message.timestamp)}
                     </span>
                   </div>
@@ -243,10 +243,10 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onBackClick, isMobile }) => 
                   
                   <div className={`group max-w-xs lg:max-w-md ${isOwnMessage ? 'ml-12' : 'mr-12'}`}>
                     <div
-                      className={`px-4 py-3 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] ${
+                      className={`px-4 py-3 rounded-lg transition-all duration-200 ${
                         isOwnMessage
-                          ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:shadow-xl rounded-br-md backdrop-blur-lg'
-                          : 'bg-white/20 text-white border border-white/30 rounded-bl-md shadow-lg hover:shadow-xl backdrop-blur-lg'
+                          ? 'bg-blue-600 text-white shadow-lg rounded-br-sm'
+                          : 'bg-zinc-800 text-white border border-zinc-700 rounded-bl-sm shadow-lg'
                       }`}
                     >
                       {message.type === MessageType.TEXT ? (
@@ -260,16 +260,16 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onBackClick, isMobile }) => 
                     </div>
                     
                     <div className={`flex items-center mt-1 space-x-2 opacity-0 group-hover:opacity-100 transition-opacity ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
-                      <p className="text-xs text-white/50">
+                      <p className="text-xs text-zinc-500">
                         {formatTime(message.timestamp)}
                       </p>
                       {isOwnMessage && (
                         <div className="flex items-center space-x-1">
-                          <span className={`text-xs ${message.delivered ? 'text-blue-300' : 'text-white/40'}`}>
+                          <span className={`text-xs ${message.delivered ? 'text-blue-400' : 'text-zinc-500'}`}>
                             {message.delivered ? '✓✓' : '✓'}
                           </span>
                           {message.read && (
-                            <span className="text-xs text-blue-300" title="Read">
+                            <span className="text-xs text-blue-400" title="Read">
                               👁
                             </span>
                           )}
@@ -286,13 +286,13 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onBackClick, isMobile }) => 
       </div>
 
       {/* Message Input */}
-      <div className="p-4 border-t border-white/20 backdrop-blur-lg bg-white/10">
+      <div className="p-4 border-t border-zinc-800 bg-zinc-900">
         <form onSubmit={handleSendMessage} className="space-y-3">
           <div className="flex items-end space-x-3">
             {/* Attachment button */}
             <button
               type="button"
-              className="p-3 text-white/70 hover:text-white rounded-2xl hover:bg-white/10 backdrop-blur-sm transition-all duration-300 group"
+              className="p-3 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition-all duration-200 group"
               title="Attach file"
               onClick={() => setShowMediaPicker(!showMediaPicker)}
             >
@@ -309,14 +309,14 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onBackClick, isMobile }) => 
                 value={messageInput}
                 onChange={handleInputChange}
                 placeholder={isConnected ? "Type your message..." : "Connecting..."}
-                className="w-full px-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300 pr-20"
+                className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 pr-20"
                 disabled={!isConnected || isLoading}
               />
               
               {/* Emoji button */}
               <button
                 type="button"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-white/50 hover:text-white transition-colors"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-zinc-500 hover:text-white transition-colors"
                 title="Add emoji"
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
               >
@@ -337,14 +337,14 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onBackClick, isMobile }) => 
             <button
               type="submit"
               disabled={!messageInput.trim() || !isConnected || isLoading}
-              className={`p-3 rounded-2xl transition-all duration-300 transform hover:scale-105 ${
+              className={`p-3 rounded-lg transition-all duration-200 ${
                 messageInput.trim() && isConnected && !isLoading
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:shadow-xl'
-                  : 'bg-white/10 text-white/40 backdrop-blur-sm'
+                  ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg'
+                  : 'bg-zinc-800 text-zinc-500'
               }`}
             >
               {isLoading ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-zinc-600 border-t-blue-500"></div>
               ) : (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -362,7 +362,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onBackClick, isMobile }) => 
 
           {/* Connection warning */}
           {!isConnected && (
-            <div className="flex items-center space-x-2 text-xs text-red-300 bg-red-500/10 backdrop-blur-sm px-3 py-2 rounded-xl border border-red-500/20">
+            <div className="flex items-center space-x-2 text-xs text-red-300 bg-red-900 px-3 py-2 rounded-lg border border-red-800">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>

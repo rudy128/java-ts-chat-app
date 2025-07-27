@@ -44,6 +44,8 @@ export type MessageType = typeof MessageType[keyof typeof MessageType];
 export interface AuthResponse {
   token: string;
   user: User;
+  success: boolean;
+  message?: string;
 }
 
 export interface LoginRequest {

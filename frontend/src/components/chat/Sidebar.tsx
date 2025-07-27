@@ -206,33 +206,33 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelectChat, isMobile }) => {
     return (
       <button
         onClick={onClick}
-        className={`w-full p-4 text-left rounded-2xl transition-all duration-300 transform hover:scale-[1.02] ${
+        className={`w-full p-3 text-left rounded-xl transition-all duration-200 ${
           isActive
-            ? 'bg-white/20 backdrop-blur-lg border border-white/30 shadow-xl'
-            : 'hover:bg-white/10 backdrop-blur-sm'
+            ? 'bg-zinc-800/80 border border-zinc-700/50'
+            : 'hover:bg-zinc-800/40'
         } group`}
       >
         <div className="flex items-center space-x-3">
           <div className="relative flex-shrink-0">
             <Avatar user={user} size={isMobile ? "md" : "lg"} />
             {isOnline && (
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-white rounded-full shadow-lg animate-pulse"></div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-zinc-900 rounded-full"></div>
             )}
           </div>
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">
-              <h3 className="font-semibold text-white truncate group-hover:text-blue-200 transition-colors">
+              <h3 className="font-medium text-white truncate">
                 {user.displayName || user.username}
               </h3>
               <div className="flex items-center space-x-2">
                 {lastMessage && (
-                  <span className="text-xs text-white/60">
+                  <span className="text-xs text-zinc-400">
                     {formatTime(lastMessage.timestamp)}
                   </span>
                 )}
                 {unreadCount > 0 && (
-                  <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center font-medium shadow-lg">
+                  <span className="bg-blue-600 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] text-center font-medium">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
@@ -240,8 +240,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelectChat, isMobile }) => {
             </div>
             
             <div className="flex items-center justify-between">
-              <p className={`text-sm truncate transition-colors ${
-                lastMessage ? 'text-white/70 group-hover:text-white/90' : 'text-white/50'
+              <p className={`text-sm truncate ${
+                lastMessage ? 'text-zinc-400' : 'text-zinc-500'
               }`}>
                 {lastMessage ? (
                   <>
@@ -263,11 +263,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelectChat, isMobile }) => {
                   'No messages yet'
                 )}
               </p>
-              <div className="flex items-center space-x-1 ml-2">
-                {isOnline && (
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                )}
-              </div>
             </div>
           </div>
         </div>
@@ -276,42 +271,42 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelectChat, isMobile }) => {
   };
 
   return (
-    <div className={`${isMobile ? 'w-full' : 'w-80'} h-full backdrop-blur-2xl bg-white/10 border-r border-white/20 flex flex-col`}>
-      {/* Header with glassy effect */}
-      <div className="p-4 border-b border-white/20 backdrop-blur-lg bg-white/5">
+    <div className={`${isMobile ? 'w-full' : 'w-80'} h-full bg-zinc-900/95 backdrop-blur-sm border-r border-zinc-800/50 flex flex-col`}>
+      {/* Header */}
+      <div className="p-4 border-b border-zinc-800/50 bg-zinc-900/80">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
             {user && (
               <div className="relative">
                 <Avatar user={user} size={isMobile ? "md" : "lg"} />
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-white rounded-full shadow-lg animate-pulse"></div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-zinc-900 rounded-full"></div>
               </div>
             )}
             <div>
-              <h2 className="font-bold text-white text-lg">
+              <h2 className="font-semibold text-white">
                 {user?.displayName || user?.username}
               </h2>
-              <p className="text-sm text-green-300 font-medium flex items-center">
-                <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+              <p className="text-sm text-green-400 font-medium flex items-center">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                 Online
               </p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="p-3 text-white/70 hover:text-white rounded-xl hover:bg-white/10 backdrop-blur-sm transition-all duration-300 group"
+            className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-lg transition-all duration-200"
             title="Logout"
           >
-            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
           </button>
         </div>
 
-        {/* Modern Search Bar */}
+        {/* Search Bar */}
         <div className="relative">
-          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <svg className="h-4 w-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-4 w-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -320,54 +315,54 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelectChat, isMobile }) => {
             placeholder="Search conversations..."
             value={searchQuery}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
+            className="w-full pl-9 pr-4 py-2.5 bg-zinc-800/60 border border-zinc-700/50 rounded-lg text-white text-sm placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
           />
           {searching && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-zinc-600 border-t-blue-500"></div>
             </div>
           )}
         </div>
         
         {/* Search status */}
         {isSearchMode && (
-          <div className="mt-2 text-xs text-white/60 px-1">
+          <div className="mt-2 text-xs text-zinc-500 px-1">
             {searching ? 'Searching...' : `Found ${searchResults.length} user${searchResults.length !== 1 ? 's' : ''}`}
           </div>
         )}
       </div>
 
-      {/* Users List with custom scrollbar */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30">
+      {/* Users List */}
+      <div className="flex-1 overflow-y-auto">
         {loading ? (
-          <div className="p-6 text-center text-white/70">
+          <div className="p-6 text-center text-zinc-400">
             <div className="inline-flex items-center space-x-2">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-white/30 border-t-white"></div>
-              <span className="font-medium">Loading conversations...</span>
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-zinc-600 border-t-blue-500"></div>
+              <span className="text-sm">Loading conversations...</span>
             </div>
           </div>
         ) : showNoResults ? (
-          <div className="p-6 text-center text-white/70">
-            <div className="mb-4">
-              <svg className="w-16 h-16 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="p-6 text-center text-zinc-500">
+            <div className="mb-3">
+              <svg className="w-12 h-12 mx-auto text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-            <h3 className="font-semibold text-white mb-2">No users found</h3>
-            <p className="text-sm text-white/50">Try searching with a different keyword</p>
+            <h3 className="font-medium text-zinc-400 mb-1">No users found</h3>
+            <p className="text-sm">Try searching with a different keyword</p>
           </div>
         ) : displayUsers.length === 0 ? (
-          <div className="p-6 text-center text-white/70">
-            <div className="mb-4">
-              <svg className="w-16 h-16 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="p-6 text-center text-zinc-500">
+            <div className="mb-3">
+              <svg className="w-12 h-12 mx-auto text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
               </svg>
             </div>
-            <h3 className="font-semibold text-white mb-2">No conversations yet</h3>
-            <p className="text-sm text-white/50">Start chatting with someone to see them here</p>
+            <h3 className="font-medium text-zinc-400 mb-1">No conversations yet</h3>
+            <p className="text-sm">Start chatting with someone to see them here</p>
           </div>
         ) : (
-          <div className="space-y-2 p-3">
+          <div className="space-y-1 p-3">
             {displayUsers
               .sort((a, b) => {
                 // Sort by: online status first, then by last message time, then by username
@@ -375,7 +370,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelectChat, isMobile }) => {
                 const bOnline = b.isOnline || b.online || onlineUsers.has(b.id);
                 
                 if (aOnline !== bOnline) {
-                  return bOnline ? 1 : -1; // Online first
+                  return bOnline ? 1 : -1;
                 }
                 
                 const aLastMsg = getLastMessage(a.id);

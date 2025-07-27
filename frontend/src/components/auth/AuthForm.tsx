@@ -1,248 +1,310 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { useAuthStore } from '../../stores/authStore';
 import { authAPI } from '../../services/api';
-import { getErrorMessage } from '../../utils';
+import Button from '../ui/Button';
+import Input from '../ui/Input';
 
 const AuthForm: React.FC = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
     displayName: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const login = useAuthStore((state) => state.login);
-  const navigate = useNavigate();
+  const { login } = useAuthStore();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
 
-    try {
-      if (isLogin) {
-        const response = await authAPI.login({
-          username: formData.username,
-          password: formData.password,
-        });
-        
-        login(response.data.user, response.data.token);
-        navigate('/chat');
-      } else {
-        const response = await authAPI.register({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-          displayName: formData.displayName,
-        });
-        
-        login(response.data.user, response.data.token);
-        navigate('/chat');
-      }
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
+    // Username validation
+    if (!formData.username.trim()) {
+      newErrors.username = 'Username is required';
+    } else if (formData.username.length < 4) {
+      newErrors.username = 'Username must be more than 4 characters';
+    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+      newErrors.username = 'Username can only contain letters, numbers, and underscores';
     }
+
+    // Email validation for signup
+    if (isSignUp && !formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (isSignUp && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    // Display name validation for signup
+    if (isSignUp && !formData.displayName.trim()) {
+      newErrors.displayName = 'Display name is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear specific field error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      // Show validation errors as toast
+      const firstError = Object.values(errors)[0];
+      if (firstError) {
+        toast.error(firstError);
+      }
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = isSignUp 
+        ? await authAPI.register({
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+            displayName: formData.displayName
+          })
+        : await authAPI.login({
+            username: formData.username,
+            password: formData.password
+          });
+
+      if (response.data.success) {
+        login(response.data.user, response.data.token);
+        toast.success(isSignUp ? 'Account created successfully! Welcome!' : 'Welcome back!');
+      } else {
+        toast.error(response.data.message || 'Authentication failed');
+      }
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      
+      // Handle specific error responses
+      if (error.response?.status === 400) {
+        if (isSignUp) {
+          // Handle signup errors
+          const errorMessage = error.response.data?.message || 'Registration failed';
+          if (errorMessage.toLowerCase().includes('username')) {
+            toast.error('Username already exists or is invalid');
+          } else if (errorMessage.toLowerCase().includes('email')) {
+            toast.error('Email already exists or is invalid');
+          } else {
+            toast.error('Registration failed. Please check your details.');
+          }
+        } else {
+          // Handle login errors - 400 typically means wrong credentials
+          toast.error('Wrong username or password');
+        }
+      } else if (error.response?.status === 401) {
+        toast.error('Wrong username or password');
+      } else if (error.response?.status === 409) {
+        toast.error('Username or email already exists');
+      } else if (error.response?.status >= 500) {
+        toast.error('Server error. Please try again later.');
+      } else {
+        toast.error(isSignUp ? 'Registration failed. Please try again.' : 'Login failed. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleMode = () => {
-    setIsLogin(!isLogin);
-    setError('');
+    setIsSignUp(!isSignUp);
     setFormData({
       username: '',
       email: '',
       password: '',
       displayName: '',
     });
+    setErrors({});
   };
 
   return (
     <div className="w-full max-w-md mx-auto">
-      {/* Form header */}
+      {/* Header */}
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-white mb-2">
-          {isLogin ? 'Welcome Back!' : 'Join ChatFlow'}
-        </h2>
-        <p className="text-white/70 text-sm">
-          {isLogin ? 'Sign in to continue your conversations' : 'Create your account to get started'}
+        <div className="w-16 h-16 mx-auto mb-4 bg-zinc-800 rounded-full flex items-center justify-center border border-zinc-700">
+          <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </div>
+        
+        <h1 className="text-3xl font-bold text-white mb-2">
+          {isSignUp ? 'Create Account' : 'Welcome Back'}
+        </h1>
+        <p className="text-zinc-400">
+          {isSignUp 
+            ? 'Join our community and start chatting' 
+            : 'Sign in to continue to your account'
+          }
         </p>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Username field */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-white/90">
-            Username
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Username */}
+        <div>
+          <label htmlFor="username" className="block text-sm font-medium text-zinc-300 mb-2">
+            Username *
           </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-            <input
-              name="username"
+          <Input
+            id="username"
+            name="username"
+            type="text"
+            placeholder="Enter your username"
+            value={formData.username}
+            onChange={handleInputChange}
+            className={`w-full ${errors.username ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+            disabled={isLoading}
+          />
+          {errors.username && (
+            <p className="mt-1 text-sm text-red-400">{errors.username}</p>
+          )}
+          {isSignUp && !errors.username && formData.username && formData.username.length >= 4 && (
+            <p className="mt-1 text-sm text-green-400">✓ Username looks good</p>
+          )}
+        </div>
+
+        {/* Email (signup only) */}
+        {isSignUp && (
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-zinc-300 mb-2">
+              Email Address *
+            </label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className={`w-full ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+              disabled={isLoading}
+            />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-400">{errors.email}</p>
+            )}
+          </div>
+        )}
+
+        {/* Display Name (signup only) */}
+        {isSignUp && (
+          <div>
+            <label htmlFor="displayName" className="block text-sm font-medium text-zinc-300 mb-2">
+              Display Name *
+            </label>
+            <Input
+              id="displayName"
+              name="displayName"
               type="text"
-              required
-              value={formData.username}
+              placeholder="How others will see you"
+              value={formData.displayName}
               onChange={handleInputChange}
-              className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
-              placeholder="Enter your username"
+              className={`w-full ${errors.displayName ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+              disabled={isLoading}
             />
-          </div>
-        </div>
-
-        {/* Email field (register only) */}
-        {!isLogin && (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-white/90">
-              Email Address
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                </svg>
-              </div>
-              <input
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleInputChange}
-                className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
-                placeholder="Enter your email"
-              />
-            </div>
+            {errors.displayName && (
+              <p className="mt-1 text-sm text-red-400">{errors.displayName}</p>
+            )}
           </div>
         )}
 
-        {/* Display Name field (register only) */}
-        {!isLogin && (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-white/90">
-              Display Name <span className="text-white/50 text-xs">(Optional)</span>
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <input
-                name="displayName"
-                type="text"
-                value={formData.displayName}
-                onChange={handleInputChange}
-                className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
-                placeholder="How others will see you"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Password field */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-white/90">
-            Password
+        {/* Password */}
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-zinc-300 mb-2">
+            Password *
           </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Enter your password"
+            value={formData.password}
+            onChange={handleInputChange}
+            className={`w-full ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+            disabled={isLoading}
+          />
+          {errors.password && (
+            <p className="mt-1 text-sm text-red-400">{errors.password}</p>
+          )}
+          {!isSignUp && (
+            <div className="mt-2 text-right">
+              <button
+                type="button"
+                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                Forgot password?
+              </button>
             </div>
-            <input
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              required
-              value={formData.password}
-              onChange={handleInputChange}
-              className="w-full pl-10 pr-12 py-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
-              placeholder="Enter your password"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-white/50 hover:text-white transition-colors"
-            >
-              {showPassword ? (
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                </svg>
-              ) : (
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              )}
-            </button>
-          </div>
+          )}
         </div>
 
-        {/* Error message */}
-        {error && (
-          <div className="bg-red-500/10 backdrop-blur-lg border border-red-500/20 rounded-2xl p-4">
-            <div className="flex items-center space-x-2">
-              <svg className="h-5 w-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-              <p className="text-sm text-red-300">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Submit button */}
-        <button
+        {/* Submit Button */}
+        <Button
           type="submit"
-          disabled={loading}
-          className={`w-full py-3 px-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-[1.02] ${
-            loading 
-              ? 'bg-white/10 text-white/40 cursor-not-allowed backdrop-blur-sm' 
-              : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-purple-700'
-          }`}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          disabled={isLoading}
         >
-          {loading ? (
+          {isLoading ? (
             <div className="flex items-center justify-center space-x-2">
               <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white"></div>
-              <span>Please wait...</span>
+              <span>{isSignUp ? 'Creating Account...' : 'Signing In...'}</span>
             </div>
           ) : (
-            isLogin ? 'Sign In' : 'Create Account'
+            isSignUp ? 'Create Account' : 'Sign In'
           )}
-        </button>
+        </Button>
 
-        {/* Toggle mode */}
-        <div className="text-center">
+        {/* Mode Toggle */}
+        <div className="text-center pt-4 border-t border-zinc-800">
+          <p className="text-zinc-400 mb-3">
+            {isSignUp ? 'Already have an account?' : "Don't have an account?"}
+          </p>
           <button
             type="button"
             onClick={toggleMode}
-            className="text-sm text-white/70 hover:text-white transition-colors font-medium"
+            disabled={isLoading}
+            className="text-blue-400 hover:text-blue-300 font-medium transition-colors disabled:opacity-50"
           >
-            {isLogin 
-              ? "Don't have an account? " 
-              : "Already have an account? "
-            }
-            <span className="text-blue-300 hover:text-blue-200 font-semibold">
-              {isLogin ? 'Sign up' : 'Sign in'}
-            </span>
+            {isSignUp ? 'Sign in instead' : 'Create account'}
           </button>
         </div>
       </form>
+
+      {/* Footer */}
+      <div className="mt-8 text-center">
+        <p className="text-xs text-zinc-500">
+          By continuing, you agree to our{' '}
+          <button className="text-blue-400 hover:text-blue-300 transition-colors">
+            Terms of Service
+          </button>{' '}
+          and{' '}
+          <button className="text-blue-400 hover:text-blue-300 transition-colors">
+            Privacy Policy
+          </button>
+        </p>
+      </div>
     </div>
   );
 };
